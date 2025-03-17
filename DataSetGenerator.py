@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 
 class DataSetGenerator(Sequence):
     def __init__(self, batch_size, root_file, mode="train", test_size=0.2):
-        
+        super().__init__()
 
         self.batch_size = batch_size
         self.root_file = root_file
@@ -25,7 +25,10 @@ class DataSetGenerator(Sequence):
         for root, _, files in os.walk(self.root_file):
             for file in files:
                 img_path.append(os.path.join(root, file))
-        return img_path#[:500]
+
+        # import random
+        # random_20_percent = random.sample(img_path, int(len(img_path) * 0.2))
+        return img_path
 
 
     def __len__(self):
@@ -35,30 +38,22 @@ class DataSetGenerator(Sequence):
     def __getitem__(self, idx):
         batch_indexes = self.list_of_img_paths[idx*self.batch_size : (idx+1)*self.batch_size]
 
-        x_batch = tf.zeros((self.batch_size, 256, 256, 1), dtype=tf.float32)
-        y_batch = tf.zeros((self.batch_size, 256, 256, 3), dtype=tf.float32)
+        x_batch = []
+        y_batch = []
         
         for i, image_path in enumerate(batch_indexes):
-        # image_path = self.list_of_img_paths[idx]
 
-            image = cv2.imread(image_path) #BGR format
-            image_grey = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY) #RGB format
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) #RGB format
-
-            image_grey = cv2.resize(image_grey, (256, 256))
-            image = cv2.resize(image, (256, 256))
-
-            image_grey = image_grey / 255.0
+            image = tf.io.read_file(image_path)
+            image = tf.image.decode_jpeg(image, channels=3)
+            image = tf.image.resize(image, [32, 32])
             image = image / 255.0
+            image_gray = tf.image.rgb_to_grayscale(image)
+            x_batch.append(image_gray)
+            y_batch.append(image)
 
-            image_grey_tensor = tf.convert_to_tensor(image_grey, dtype=tf.float32)
-            image = tf.convert_to_tensor(image, dtype=tf.float32)
+        return tf.stack(x_batch), tf.stack(y_batch)
+    
 
-            image_grey_tensor = tf.expand_dims(image_grey_tensor, axis=-1)  # (H, W, 1)
-            # x = tf.expand_dims(image_grey_tensor, axis=0)
-            # y = tf.expand_dims(image, axis=0)
-            
-            x_batch = tf.tensor_scatter_nd_update(x_batch, [[i]], [image_grey_tensor])
-            y_batch = tf.tensor_scatter_nd_update(y_batch, [[i]], [image])
-
-        return x_batch, y_batch
+    def on_epoch_end(self):
+        # Shuffle indices at the end of each epoch
+        np.random.shuffle(self.indexes)

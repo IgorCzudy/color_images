@@ -1,5 +1,5 @@
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Conv2D, Conv2DTranspose
+from tensorflow.keras.layers import Conv2D, Conv2DTranspose, Dropout, BatchNormalization
 import tensorflow as tf
 import keras
 
@@ -14,8 +14,10 @@ class Encoder(Model):
         self.my_layers = []
         for filter in filters:
             self.my_layers.append(
-                Conv2D(filters=filter, kernel_size=kernel_size, strides=(2,2), padding="same", activation='relu')
+                Conv2D(filters=filter, kernel_size=kernel_size, strides=2, padding="same", activation='relu')
             )
+            # self.my_layers.append(BatchNormalization(0.1))
+
             
     def call(self, inputs, training=False):
         for my_layer in self.my_layers:
@@ -49,8 +51,10 @@ class Decoder(Model):
             self.my_layers.append(
                 Conv2DTranspose(filters=filter, kernel_size=kernel_size, strides=2, padding="same", activation='relu')
             )
+            # self.my_layers.append(BatchNormalization(0.1))
+
         self.my_layers.append(
-            Conv2D(filters=3, kernel_size=(3, 3), strides=1, padding="same", activation='sigmoid')
+            Conv2D(filters=3, kernel_size=3, strides=1, padding="same", activation='sigmoid')
         )
 
     

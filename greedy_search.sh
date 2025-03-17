@@ -4,7 +4,6 @@ batch_sizes=(8 16)
 learning_rates=(1e-3 5e-3)
 filters_options=(
   "128 64 32 16"
-  "64 32 16"
   "64 32"
 )
 kernel_sizes=("3 3" "5 5")
