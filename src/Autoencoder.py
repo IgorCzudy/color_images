@@ -26,16 +26,15 @@ class Encoder(Model):
         return inputs
 
     def get_config(self):
-        config = super().get_config()  # Get the default config from the parent class
+        config = super().get_config()
         config.update({
-            'filters': self.filters,  # Include the filters used to initialize
-            'kernel_size': self.kernel_size,  # Include the kernel_size used to initialize
+            'filters': self.filters,
+            'kernel_size': self.kernel_size,
         })
         return config
 
     @classmethod
     def from_config(cls, config):
-        # Create the instance of Encoder using the config
         return cls(filters=config['filters'], kernel_size=config['kernel_size'])
 
 
@@ -64,16 +63,15 @@ class Decoder(Model):
         return inputs
     
     def get_config(self):
-        config = super().get_config()  # Get the default config from the parent class
+        config = super().get_config()
         config.update({
-            'filters': self.filters,  # Include the filters used to initialize
-            'kernel_size': self.kernel_size,  # Include the kernel_size used to initialize
+            'filters': self.filters,
+            'kernel_size': self.kernel_size,
         })
         return config
 
     @classmethod
     def from_config(cls, config):
-        # Create the instance of Decoder using the config
         return cls(filters=config['filters'], kernel_size=config['kernel_size'])
 
     
@@ -94,14 +92,13 @@ class Autoencoder(Model):
         return inputs
 
     def get_config(self):
-        config = super().get_config()  # Get the default config from the parent class
+        config = super().get_config()
         config.update({
-            'filters': self.filters,  # Include the filters used to initialize
-            'kernel_size': self.kernel_size,  # Include the kernel_size used to initialize
+            'filters': self.filters,
+            'kernel_size': self.kernel_size,
         })
         return config
 
     @classmethod
     def from_config(cls, config):
-        # Create the instance of Autoencoder using the config
         return cls(filters=config['filters'], kernel_size=config['kernel_size'])

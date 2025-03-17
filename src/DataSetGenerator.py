@@ -1,5 +1,4 @@
 import os 
-import cv2
 import tensorflow as tf
 from tensorflow.keras.utils import Sequence
 import numpy as np

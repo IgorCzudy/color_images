@@ -1,26 +1,23 @@
 from src.Autoencoder import Autoencoder
 from src.DataSetGenerator import DataSetGenerator
-from tensorflow.keras.optimizers import AdamW, Adam
+from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
 import kagglehub
 import shutil
 import os
-from tensorflow.keras.optimizers.schedules import PiecewiseConstantDecay
 import click
 import tensorflow as tf 
 import keras 
-from tensorflow.keras import backend as K
-from tensorflow.keras.applications import VGG16
 import tensorflow as tf
 
 
 def preper_dataset():
     path = kagglehub.dataset_download("sautkin/imagenet1k0")
-    shutil.copytree(path, "./2", dirs_exist_ok=True)
+    shutil.copytree(path, "../dataSet", dirs_exist_ok=True)
 
 def setup_callbacks(model_file_name):
-    log_dir = f"logs/{model_file_name}"
-    checkpoint_dir = "checkpoints"
+    log_dir = f"../logs/{model_file_name}"
+    checkpoint_dir = "../checkpoints"
 
     tensorboard_callback = TensorBoard(log_dir=log_dir)
 
@@ -35,7 +32,7 @@ def setup_callbacks(model_file_name):
     return [tensorboard_callback, checkpoint_callback]
 
 
-@keras.saving.register_keras_serializable()  # Register the loss function
+@keras.saving.register_keras_serializable()
 def ssim_loss(y_true, y_pred):
     mse_loss = tf.keras.losses.MeanSquaredError()(y_true, y_pred)
     # ssim_loss = 1 - tf.image.ssim(y_true, y_pred, max_val=1.0)
@@ -51,8 +48,8 @@ def ssim_loss(y_true, y_pred):
 def main(number_of_epoches, batch_size, initial_learning_rate, filters, kernel_size):
     preper_dataset()
 
-    tainDataSetGenerator = DataSetGenerator(batch_size=batch_size, root_file="2", mode="train")
-    testDataSetGenerator = DataSetGenerator(batch_size=batch_size, root_file="2", mode="test")
+    tainDataSetGenerator = DataSetGenerator(batch_size=batch_size, root_file="../dataSet", mode="train")
+    testDataSetGenerator = DataSetGenerator(batch_size=batch_size, root_file="../dataSet", mode="test")
 
     initial_learning_rate = 1e-3
     final_learning_rate = 1e-5
@@ -61,15 +58,13 @@ def main(number_of_epoches, batch_size, initial_learning_rate, filters, kernel_s
     steps_per_epoch = int(train_size/batch_size)
 
 
-    # Define the scheduler — Exponential Decay as an example
     lr_scheduler = tf.keras.optimizers.schedules.ExponentialDecay(
         initial_learning_rate=initial_learning_rate,
         decay_steps=steps_per_epoch,
         decay_rate=learning_rate_decay_factor,
-        staircase=True  # If True, decay in discrete intervals
+        staircase=True 
     )
 
-    # Pass the scheduler into the AdamW optimizer
     optimizer = Adam(learning_rate=lr_scheduler)
 
     model = Autoencoder(filters=filters, kernel_size=kernel_size)
